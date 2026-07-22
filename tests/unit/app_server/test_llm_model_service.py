@@ -45,6 +45,14 @@ class TestDefaultLLMModelServiceSearchModels:
         assert 'clarifai' in providers
 
     @pytest.mark.asyncio
+    async def test_includes_aimlapi_models(self):
+        service = DefaultLLMModelService()
+        result = await service.search_llm_models(limit=10000)
+
+        providers = {m.provider for m in result.items}
+        assert 'aiml' in providers
+
+    @pytest.mark.asyncio
     async def test_filters_by_query(self):
         service = DefaultLLMModelService()
         result = await service.search_llm_models(query='gpt', limit=10000)

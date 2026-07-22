@@ -52,6 +52,45 @@ CLARIFAI_MODELS = [
     'clarifai/moonshotai.kimi.Kimi-K2-Instruct',
 ]
 
+# AIMLAPI (https://aimlapi.com) — an OpenAI-compatible model aggregator exposed
+# by LiteLLM as the ``aiml`` provider (base URL https://api.aimlapi.com/v1,
+# overridable via the ``AIML_API_BASE`` env var; key via ``AIML_API_KEY`` or the
+# per-LLM api_key). LiteLLM does not enumerate the aggregator catalogue, so a
+# curated set of tool-calling chat models is injected here the same way as
+# ``CLARIFAI_MODELS``. Ids are taken verbatim from
+# ``GET https://api.aimlapi.com/v1/models`` (type ``openai/chat-completions``,
+# capability ``tools``); refresh from there when updating.
+AIMLAPI_MODELS = [
+    # OpenAI
+    'aiml/openai/gpt-5.2-codex',
+    'aiml/openai/gpt-5-codex',
+    'aiml/openai/gpt-4.1',
+    'aiml/openai/gpt-4.1-mini',
+    'aiml/openai/gpt-4o',
+    'aiml/openai/gpt-4o-mini',
+    # Anthropic
+    'aiml/anthropic/claude-opus-4.8',
+    'aiml/anthropic/claude-sonnet-4.6',
+    'aiml/anthropic/claude-sonnet-4.5',
+    'aiml/anthropic/claude-haiku-4.5',
+    # Google
+    'aiml/google/gemini-2.5-pro',
+    'aiml/google/gemini-2.5-flash',
+    # DeepSeek
+    'aiml/deepseek/deepseek-v4-pro',
+    'aiml/deepseek/deepseek-chat-v3.1',
+    # Alibaba Qwen
+    'aiml/Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8',
+    'aiml/Qwen/Qwen3-235B-A22B-Thinking-2507',
+    # Meta Llama
+    'aiml/meta-llama/Llama-3.3-70B-Instruct-Turbo',
+    # Mistral
+    'aiml/mistralai/mistral-large-2512',
+    'aiml/mistralai/mistral-medium-3.1',
+    # Moonshot
+    'aiml/moonshot/kimi-k2-7-code',
+]
+
 # ---------------------------------------------------------------------------
 # Provider-assignment tables — derived from the SDK.
 #
@@ -292,7 +331,10 @@ def get_supported_llm_models(
 
     # Assign canonical provider prefixes to bare LiteLLM names, then dedupe.
     all_models = (
-        openhands_models + CLARIFAI_MODELS + [_assign_provider(m) for m in model_list]
+        openhands_models
+        + CLARIFAI_MODELS
+        + AIMLAPI_MODELS
+        + [_assign_provider(m) for m in model_list]
     )
     unique_models = sorted(set(all_models))
 
