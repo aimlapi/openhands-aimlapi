@@ -1,5 +1,8 @@
 from fastapi import APIRouter
 
+from openhands.app_server.aimlapi.agent_auth_router import (
+    router as aimlapi_auth_router,
+)
 from openhands.app_server.app_conversation import app_conversation_router
 from openhands.app_server.config_api.config_router import router as config_router
 from openhands.app_server.event import event_router
@@ -35,3 +38,4 @@ router.include_router(webhook_router.router)
 router.include_router(web_client_router.router)
 router.include_router(git_router)
 router.include_router(config_router)
+router.include_router(aimlapi_auth_router)

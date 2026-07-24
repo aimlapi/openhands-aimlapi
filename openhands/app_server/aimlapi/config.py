@@ -1,0 +1,85 @@
+"""AIMLAPI endpoints, partner attribution, and requested spend limit.
+
+Production values are compiled in and every value is overridable via an
+``AIMLAPI_*`` environment variable, so the same build runs against staging by
+changing only the endpoint/partner env (see the meta-repo ``PARTNERS.md`` and
+``HEADERS.md``). No staging URL is hard-coded.
+"""
+
+import os
+from dataclasses import dataclass
+
+# Provisioned OpenHands partner — the same id is valid on staging and
+# production, so it ships as the compiled-in default (see PARTNERS.md).
+# Override with AIMLAPI_PARTNER_ID only for a staging-only test id.
+DEFAULT_AIMLAPI_PARTNER_ID = 'part_uDVajKg3xPLrOdNdQetOtoGA'
+DEFAULT_AIMLAPI_PARTNER_NAME = 'OpenHands'
+# Spend cap presented on the consent screen, in USD minor units ($10).
+DEFAULT_AIMLAPI_REQUESTED_USD_LIMIT_MINOR = 1000
+
+# Sent to the consent screen so the user sees which app is asking for a key.
+AGENT_NAME = 'OpenHands'
+
+
+def _env_or_default(name: str, default: str) -> str:
+    value = (os.getenv(name) or '').strip()
+    return value or default
+
+
+@dataclass(frozen=True, slots=True)
+class AimlapiEndpoints:
+    app_base_url: str
+    auth_base_url: str
+    inference_base_url: str
+    pay_base_url: str
+    verification_base_url: str
+
+
+def resolve_endpoints() -> AimlapiEndpoints:
+    return AimlapiEndpoints(
+        app_base_url=_env_or_default(
+            'AIMLAPI_APP_URL', 'https://app.aimlapi.com'
+        ).rstrip('/'),
+        auth_base_url=_env_or_default(
+            'AIMLAPI_AUTH_URL', 'https://auth.aimlapi.com'
+        ).rstrip('/'),
+        inference_base_url=_env_or_default(
+            'AIMLAPI_INFERENCE_URL', 'https://api.aimlapi.com/v1'
+        ).rstrip('/'),
+        pay_base_url=_env_or_default(
+            'AIMLAPI_PAY_URL', 'https://pay.aimlapi.com'
+        ).rstrip('/'),
+        # Host of the browser consent page. The create response returns a
+        # production URL even on staging, so the consent URL is always rebuilt
+        # from this base (default = prod, override for staging).
+        verification_base_url=_env_or_default(
+            'AIMLAPI_VERIFICATION_BASE_URL', 'https://aimlapi.com'
+        ).rstrip('/'),
+    )
+
+
+def resolve_partner_id() -> str:
+    return _env_or_default('AIMLAPI_PARTNER_ID', DEFAULT_AIMLAPI_PARTNER_ID)
+
+
+def resolve_partner_name() -> str:
+    return _env_or_default('AIMLAPI_PARTNER_NAME', DEFAULT_AIMLAPI_PARTNER_NAME)
+
+
+def resolve_requested_usd_limit_minor() -> int:
+    raw = os.getenv('AIMLAPI_REQUESTED_USD_LIMIT_MINOR')
+    if raw is None:
+        return DEFAULT_AIMLAPI_REQUESTED_USD_LIMIT_MINOR
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return DEFAULT_AIMLAPI_REQUESTED_USD_LIMIT_MINOR
+    return value if value > 0 else DEFAULT_AIMLAPI_REQUESTED_USD_LIMIT_MINOR
+
+
+def attribution_headers() -> dict[str, str]:
+    """Headers that mark AIMLAPI traffic as agent-sourced for this partner."""
+    return {
+        'X-AIMLAPI-Source': 'agent',
+        'X-AIMLAPI-Partner-ID': resolve_partner_id(),
+    }

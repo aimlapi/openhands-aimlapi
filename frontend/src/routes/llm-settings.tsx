@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { FaChevronLeft } from "react-icons/fa6";
+import { AimlapiKeyField } from "#/components/features/settings/aimlapi/aimlapi-key-field";
 import { ModelSelector } from "#/components/shared/modals/settings/model-selector";
 import { createPermissionGuard } from "#/utils/org/permission-guard";
 import { requireOrgDefaultsRedirect } from "#/utils/org/saas-redirect-to-org-defaults-guard";
@@ -346,6 +347,25 @@ export function LlmSettingsScreen({
 
         if (shouldUseOpenHandsKey) {
           return null;
+        }
+
+        // AIMLAPI pairs the key field with a "Get API key" (OAuth) button in
+        // the same row and owns its own layout/help.
+        if (activeProvider === "aiml") {
+          return (
+            <AimlapiKeyField
+              testId={testId}
+              helpTestId={helpTestId}
+              value={
+                typeof values["llm.api_key"] === "string"
+                  ? values["llm.api_key"]
+                  : ""
+              }
+              apiKeySet={apiKeySet}
+              isDisabled={isDisabled}
+              onChange={(value) => onChange("llm.api_key", value)}
+            />
+          );
         }
 
         return (
