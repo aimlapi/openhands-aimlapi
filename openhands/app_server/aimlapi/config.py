@@ -2,15 +2,14 @@
 
 Production values are compiled in and every value is overridable via an
 ``AIMLAPI_*`` environment variable, so the same build runs against staging by
-changing only the endpoint/partner env (see the meta-repo ``PARTNERS.md`` and
-``HEADERS.md``). No staging URL is hard-coded.
+changing only the endpoint/partner env. No staging URL is hard-coded.
 """
 
 import os
 from dataclasses import dataclass
 
 # Provisioned OpenHands partner — the same id is valid on staging and
-# production, so it ships as the compiled-in default (see PARTNERS.md).
+# production, so it ships as the compiled-in default.
 # Override with AIMLAPI_PARTNER_ID only for a staging-only test id.
 DEFAULT_AIMLAPI_PARTNER_ID = 'part_uDVajKg3xPLrOdNdQetOtoGA'
 DEFAULT_AIMLAPI_PARTNER_NAME = 'OpenHands'
