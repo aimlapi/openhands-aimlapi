@@ -48,11 +48,13 @@ def resolve_endpoints() -> AimlapiEndpoints:
         pay_base_url=_env_or_default(
             'AIMLAPI_PAY_URL', 'https://pay.aimlapi.com'
         ).rstrip('/'),
-        # Host of the browser consent page. The create response returns a
-        # production URL even on staging, so the consent URL is always rebuilt
-        # from this base (default = prod, override for staging).
+        # Base of the browser consent page, which lives in the web app under
+        # ``/app`` (the bare host is a static marketing site). The create
+        # response returns a production URL even on staging, so the consent URL
+        # is always rebuilt from this base (default = prod, override for
+        # staging, e.g. https://staging.aimlapi.com/app).
         verification_base_url=_env_or_default(
-            'AIMLAPI_VERIFICATION_BASE_URL', 'https://aimlapi.com'
+            'AIMLAPI_VERIFICATION_BASE_URL', 'https://aimlapi.com/app'
         ).rstrip('/'),
     )
 
